@@ -24,6 +24,7 @@ pub fn scanApps() -> Vec<App> {
     if output.status.success() {
         let report: Report = serde_json::from_slice(&output.stdout).expect("Bad JSON");
         let mut neededvec = Vec::<App>::new();
+
         for x in report.apps {
             let y = x.path.as_deref();
             let z = y.unwrap_or("").split('/');
@@ -37,7 +38,7 @@ pub fn scanApps() -> Vec<App> {
                 neededvec.push(x);
             }
         }
-
+        neededvec.sort_by_key(|app| app._name.to_lowercase());
         neededvec
     } else {
         eprint!("stderr: {}", String::from_utf8_lossy(&output.stderr));
