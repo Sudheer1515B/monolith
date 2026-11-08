@@ -1,16 +1,30 @@
+use serde::Deserialize;
 use std::process::Command;
-//prototype to see if i can pass through shell commands from rust into the system to get some output
-pub fn main() {
+
+#[derive(Deserialize)]
+struct Report {
+    #[serde(rename = "SPApplicationsDataType")]
+    apps: Vec<App>,
+}
+
+#[derive(Deserialize)]
+pub struct App {
+    pub _name: String,
+    pub version: Option<String>,
+    pub path: Option<String>,
+    pub obtained_from: Option<String>,
+}
+
+pub fn scanApps() -> Vec<App> {
     let output = Command::new("system_profiler")
         .args(["SPApplicationsDataType", "-json"])
         .output()
         .expect("failed at runnin sysprofiler");
-
     if output.status.success() {
-        println!("data: {}", String::from_utf8_lossy(&output.stdout));
+        let report: Report = serde_json::from_slice(&output.stdout).expect("Bad JSON");
+        report.apps
     } else {
-        println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+        eprint!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+        Vec::new()
     }
-    //here output is stored as a 8 bit value, so we call String::from_utf8_lossy to convert the
-    // unsigned 8 bit values in the ouput vec into a string
 }
