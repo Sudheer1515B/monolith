@@ -20,9 +20,25 @@ pub fn scanApps() -> Vec<App> {
         .args(["SPApplicationsDataType", "-json"])
         .output()
         .expect("failed at runnin sysprofiler");
+
     if output.status.success() {
         let report: Report = serde_json::from_slice(&output.stdout).expect("Bad JSON");
-        report.apps
+        let mut neededvec = Vec::<App>::new();
+        for x in report.apps {
+            let y = x.path.as_deref();
+            let z = y.unwrap_or("").split('/');
+            let mut count: u64 = 0;
+            for components in z {
+                if components == "Applications" {
+                    count += 1;
+                }
+            }
+            if count == 1 {
+                neededvec.push(x);
+            }
+        }
+
+        neededvec
     } else {
         eprint!("stderr: {}", String::from_utf8_lossy(&output.stderr));
         Vec::new()
