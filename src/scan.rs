@@ -5,8 +5,11 @@ pub fn main() {
         .args(["SPApplicationsDataType", "-json"])
         .output()
         .expect("failed at runnin sysprofiler");
+
     if output.status.success() {
         println!("data: {}", String::from_utf8_lossy(&output.stdout));
+    } else {
+        println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
     }
     //here output is stored as a 8 bit value, so we call String::from_utf8_lossy to convert the
     // unsigned 8 bit values in the ouput vec into a string
