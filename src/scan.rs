@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use std::process::Command;
-use std::time::UNIX_EPOCH;
 
 #[derive(Deserialize)]
 struct Report {
@@ -24,7 +23,7 @@ pub fn scanApps() -> Vec<App> {
 
     if output.status.success() {
         let report: Report = serde_json::from_slice(&output.stdout).expect("Bad JSON");
-        let mut neededvec = Vec::<App>::new();
+        let mut neededVec = Vec::<App>::new();
 
         for x in report.apps {
             let y = x.path.as_deref();
@@ -36,11 +35,11 @@ pub fn scanApps() -> Vec<App> {
                 }
             }
             if count == 1 {
-                neededvec.push(x);
+                neededVec.push(x);
             }
         }
-        neededvec.sort_by_key(|app| app._name.to_lowercase());
-        neededvec
+        neededVec.sort_by_key(|app| app._name.to_lowercase());
+        neededVec
     } else {
         eprint!("stderr: {}", String::from_utf8_lossy(&output.stderr));
         Vec::new()
@@ -86,7 +85,15 @@ pub fn scanFormulaes() -> Vec<Formulas> {
         .expect("scanFormulaes for Brew failed");
     if output.status.success() {
         let mut report: ReportBrew = serde_json::from_slice(&output.stdout).expect("Bad JSON");
-        report.formulas
+        let mut neededFormulas = Vec::<Formulas>::new();
+        //i hate you rust ownership
+        for formula in report.formulas {
+            if formula.installed.iter().any(|x| x.installed_on_request) {
+                neededFormulas.push(formula);
+            }
+        }
+        neededFormulas.sort_by_key(|formula| formula.name.to_lowercase());
+        neededFormulas
     } else {
         eprintln!("stderr: {}", String::from_utf8_lossy(&output.stderr));
         Vec::<Formulas>::new()

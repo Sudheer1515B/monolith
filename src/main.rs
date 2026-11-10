@@ -4,9 +4,9 @@ fn main() {
     let casklist = scan::scanCasks();
     let formulalist = scan::scanFormulaes();
     for formula in formulalist {
-        match &formula.homepage {
-            Some(desc) => println!("{} ", desc),
-            None => println!("No description"),
-        }
+        println!("{}", formula.name);
+    }
+    for cask in casklist {
+        println!("{}", cask.token);
     }
 }
