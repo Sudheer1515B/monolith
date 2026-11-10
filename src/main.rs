@@ -1,6 +1,12 @@
 mod scan;
 fn main() {
-    for app in scan::scanApps() {
-        println!("{} {}", app._name, app.version.unwrap_or_default())
+    let applist = scan::scanApps();
+    let casklist = scan::scanCasks();
+    let formulalist = scan::scanFormulaes();
+    for formula in formulalist {
+        match &formula.homepage {
+            Some(desc) => println!("{} ", desc),
+            None => println!("No description"),
+        }
     }
 }
